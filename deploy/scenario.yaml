@@ -1,0 +1,10 @@
+﻿apiVersion: ai.sap.com/v1alpha1
+kind: Scenario
+metadata:
+  name: agentic-ap-automation
+  annotations:
+    scenarios.ai.sap.com/description: "Agentic AP Automation"
+    scenarios.ai.sap.com/name: "Agentic AP Automation"
+  labels:
+    scenarios.ai.sap.com/id: "agentic-ap-automation"
+    ai.sap.com/version: "1.0"
