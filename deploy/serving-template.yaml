@@ -1,0 +1,110 @@
+# SAP AI Core Serving Template
+# Deploys the LangGraph invoice agent as a REST endpoint
+# Apply via: PUT /v2/lm/scenarios/{scenarioId}/executables/{executableId}
+apiVersion: ai.sap.com/v1alpha1
+kind: ServingTemplate
+metadata:
+  name: agentic-ap-automation
+  annotations:
+    scenarios.ai.sap.com/description: "LangGraph agent orchestrating Document AI, LLM validation, and S/4HANA posting"
+    scenarios.ai.sap.com/name: "agentic-ap-automation"
+    executables.ai.sap.com/description: "FastAPI serving of the LangGraph state machine"
+    executables.ai.sap.com/name: "ap-agent-serve"
+  labels:
+    scenarios.ai.sap.com/id: "agentic-ap-automation"
+    ai.sap.com/version: "1.0.0"
+spec:
+  inputs:
+    parameters:
+      - name: image
+        type: string
+        default: "docker.io/YOUR_DOCKER_USER/agentic-ap-automation:1.0.0"
+      - name: replicas
+        type: string
+        default: "1"
+  template:
+    apiVersion: serving.kserve.io/v1beta1
+    kind: InferenceService
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "3"
+    spec:
+      predictor:
+        minReplicas: 1
+        maxReplicas: 3
+        containers:
+          - name: kserve-container
+            image: "{{inputs.parameters.image}}"
+            ports:
+              - containerPort: 8080
+                protocol: TCP
+            env:
+              # Document AI credentials (bind via AI Core Generic Secret)
+              - name: DOC_AI_URL
+                valueFrom:
+                  secretKeyRef:
+                    name: document-ai-secret
+                    key: url
+              - name: DOC_AI_TOKEN_URL
+                valueFrom:
+                  secretKeyRef:
+                    name: document-ai-secret
+                    key: token_url
+              - name: DOC_AI_CLIENT_ID
+                valueFrom:
+                  secretKeyRef:
+                    name: document-ai-secret
+                    key: client_id
+              - name: DOC_AI_CLIENT_SECRET
+                valueFrom:
+                  secretKeyRef:
+                    name: document-ai-secret
+                    key: client_secret
+              - name: DOC_AI_CLIENT
+                value: "default"
+              # AI Core LLM inference endpoint
+              - name: AI_CORE_URL
+                valueFrom:
+                  secretKeyRef:
+                    name: ai-core-llm-secret
+                    key: inference_url
+              - name: AI_CORE_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: ai-core-llm-secret
+                    key: token
+              - name: AI_CORE_MODEL
+                value: "anthropic--claude-3.5-sonnet"
+              # S/4HANA OData
+              - name: S4_ODATA_URL
+                valueFrom:
+                  secretKeyRef:
+                    name: s4-hana-secret
+                    key: odata_url
+              - name: S4_USER
+                valueFrom:
+                  secretKeyRef:
+                    name: s4-hana-secret
+                    key: user
+              - name: S4_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: s4-hana-secret
+                    key: password
+              # SBPA callback for yellow path
+              - name: SBPA_APPROVAL_URL
+                valueFrom:
+                  secretKeyRef:
+                    name: sbpa-secret
+                    key: approval_webhook_url
+                    optional: true
+              - name: NOTIFY_EMAIL
+                value: "ap-team@company.com"
+            resources:
+              requests:
+                cpu: "500m"
+                memory: "1Gi"
+              limits:
+                cpu: "2"
+                memory: "4Gi"
