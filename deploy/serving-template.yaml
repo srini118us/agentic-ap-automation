@@ -31,3 +31,26 @@ spec:
           ports:
           - containerPort: 9001
             protocol: TCP
+          env:
+          - name: DOC_AI_URL
+            valueFrom: {secretKeyRef: {name: ap-agent-creds, key: DOC_AI_URL}}
+          - name: DOC_AI_TOKEN_URL
+            valueFrom: {secretKeyRef: {name: ap-agent-creds, key: DOC_AI_TOKEN_URL}}
+          - name: DOC_AI_CLIENT_ID
+            valueFrom: {secretKeyRef: {name: ap-agent-creds, key: DOC_AI_CLIENT_ID}}
+          - name: DOC_AI_CLIENT_SECRET
+            valueFrom: {secretKeyRef: {name: ap-agent-creds, key: DOC_AI_CLIENT_SECRET}}
+          - name: AI_CORE_URL
+            valueFrom: {secretKeyRef: {name: ap-agent-creds, key: AI_CORE_URL}}
+          - name: AI_CORE_AUTH_URL
+            valueFrom: {secretKeyRef: {name: ap-agent-creds, key: AI_CORE_AUTH_URL}}
+          - name: AI_CORE_CLIENT_ID
+            valueFrom: {secretKeyRef: {name: ap-agent-creds, key: AI_CORE_CLIENT_ID}}
+          - name: AI_CORE_CLIENT_SECRET
+            valueFrom: {secretKeyRef: {name: ap-agent-creds, key: AI_CORE_CLIENT_SECRET}}
+          - name: S4_ODATA_URL
+            valueFrom: {secretKeyRef: {name: ap-agent-creds, key: S4_ODATA_URL}}
+          - name: S4_USER
+            valueFrom: {secretKeyRef: {name: ap-agent-creds, key: S4_USER}}
+          - name: S4_PASSWORD
+            valueFrom: {secretKeyRef: {name: ap-agent-creds, key: S4_PASSWORD}}
